@@ -31,7 +31,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: environment.yml
-          environment-name: '{{ option_pricing }}'
+          environment-name: option_pricing
           cache-env: true
           extra-specs: |
             python=${{ matrix.python-version }}
