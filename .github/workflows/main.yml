@@ -8,10 +8,10 @@ concurrency:
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - '*'
+      - '*'
 jobs:
   run-tests:
     name: Run tests for ${{ matrix.os }} on ${{ matrix.python-version }}
@@ -31,7 +31,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: environment.yml
-          environment-name: "{{ cookiecutter.project_slug }}"
+          environment-name: '{{ option_pricing }}'
           cache-env: true
           extra-specs: |
             python=${{ matrix.python-version }}
