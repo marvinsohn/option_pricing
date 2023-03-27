@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def european_vanilla(s0, k, t, r, sigma, call):
+def bs_european_vanilla(s0, k, t, r, sigma, call):
     """Compute the value of an European vanilla option.
 
     Args:
@@ -29,7 +29,7 @@ def european_vanilla(s0, k, t, r, sigma, call):
     return k * np.exp(-r * t) * (1 - norm.cdf(d2)) - s0 * (1 - norm.cdf(d1))
 
 
-def european_exchange(v0, u0, sigma_v, sigma_u, rho, t):
+def bs_european_exchange(v0, u0, sigma_v, sigma_u, rho, t):
     """Compute the value of an European exchange option (= spread option with K=0).
 
     Args:
