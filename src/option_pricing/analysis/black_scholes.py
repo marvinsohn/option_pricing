@@ -30,22 +30,24 @@ def bs_european_vanilla(s0, k, t, r, sigma, call):
 
 
 def bs_european_exchange(v0, u0, sigma_v, sigma_u, rho, t):
-    """Compute the value of an European exchange option (= spread option with K=0).
+    """Compute the value of an European exchange option.
+
+    The option holder receives asset V in exchange for asset U.
 
     Args:
-        v0 (_type_): Drift of asset V
-        u0 (_type_): Dirft of asset U
-        sigma_v (float): Volatility of asset v
-        sigma_u (_type_): Volatility of asset u
+        v0 (_type_): Price of asset V
+        u0 (_type_): Price of asset U
+        sigma_v (float): Volatility of asset V
+        sigma_u (_type_): Volatility of asset U
         rho (float): Correlation of the two Wiener processes
-        t (integer): Time until expiry
+        t (float): Time until expiry
 
     Returns:
         float: Option prize
 
     """
-    sigma_hat = np.srqt(pow(sigma_u, 2) + pow(sigma_v, 2) - 2 * rho * sigma_u * sigma_v)
-    d1 = (np.log(v0 / u0) + 0.5 * t * pow(sigma_hat)) / (sigma_hat * np.sqrt(t))
-    d2 = d1 - sigma_hat * np.sqrt(t)
+    sigma_v_u = np.sqrt(pow(sigma_u, 2) + pow(sigma_v, 2) - 2 * rho * sigma_u * sigma_v)
+    d1 = (np.log(v0 / u0) + 0.5 * t * pow(sigma_v_u, 2)) / (sigma_v_u * np.sqrt(t))
+    d2 = d1 - sigma_v_u * np.sqrt(t)
 
     return v0 * norm.cdf(d1) - u0 * norm.cdf(d2)
