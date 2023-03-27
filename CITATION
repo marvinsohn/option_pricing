@@ -1,0 +1,6 @@
+@Unpublished{option_pricing2023,
+    Title  = {Variance Reduction Techniques of Monte Carlo Simulations for Option Pricing.},
+    Author = {Marvin Sohn},
+    Year   = {2023},
+    Url    = {https://github.com/marvinsohn/option_pricing}
+}
