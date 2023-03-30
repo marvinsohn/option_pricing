@@ -302,7 +302,9 @@ def cv_european_vanilla_gamma(
         * (
             (st_underlying[1:] - st_underlying[:-1]) ** 2
             - (np.exp((2 * r + sigma**2) * dt) - 2 * np.exp(r * dt) + 1)
+            * st_underlying[:-1] ** 2
         ),
+        axis=0,
     )
 
     if option_type == "call":
