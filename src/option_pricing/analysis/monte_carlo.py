@@ -1,4 +1,9 @@
-"""Price options via monte carlo simulations."""
+"""Price options via plain monte carlo simulations.
+
+This script is ONLY for pricing options via plain monte carlo. If you want monte carlo
+with control variates, go to control_variestes.py.
+
+"""
 import numpy as np
 from scipy.stats import ttest_1samp
 
@@ -17,7 +22,7 @@ def mc_european_vanilla(
     number_steps,
     number_replications,
     vectorized,
-    call,
+    option_type,
 ):
     """Price European vanilla option via monte carlo simulation.
 
@@ -30,7 +35,7 @@ def mc_european_vanilla(
         number_steps (int): Number of steps in each simulation
         number_replications (inter): Number of different simulations
         vectorized (bool): True for vectorized version. False for loop version
-        call (bool): True for call option. False for put option.
+        option_type (bool): call, put
 
     Returns:
         float: Present value of the option contract
@@ -49,7 +54,7 @@ def mc_european_vanilla(
     )
 
     # compute payoffs
-    if call is True:
+    if option_type == "call":
         payoffs_at_t = [np.maximum(path[-1] - k, 0) for path in gbm_paths]
     else:
         payoffs_at_t = [np.maximum(k - path[-1], 0) for path in gbm_paths]
