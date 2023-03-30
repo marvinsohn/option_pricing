@@ -33,7 +33,8 @@ def mc_european_vanilla(
         call (bool): True for call option. False for put option.
 
     Returns:
-        _type_: _description_
+        float: Present value of the option contract
+        float: Standard error of the price of the option contract
 
     """
     # get paths
@@ -114,15 +115,3 @@ def mc_european_exchange(
     ci = aux.confidence_interval()
 
     return value, ci
-
-
-mc_european_exchange(
-    [50, 60],
-    [0.05, 0.05],
-    [0.3, 0.4],
-    np.array([[1, 0.7], [0.7, 1]]),
-    5 / 12,
-    1,
-    200000,
-    0.95,
-)
