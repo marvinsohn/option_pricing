@@ -72,7 +72,19 @@ def cv_european_vanilla(
 
     elif variate == "delta":
 
-        price, standard_error = cv_european_vanilla_delta()
+        price, standard_error = cv_european_vanilla_delta(
+            s0=s0,
+            k=k,
+            r=r,
+            t=t,
+            sigma=sigma,
+            option_type=option_type,
+            number_steps=number_steps,
+            number_replications=number_replications,
+            nu_dt=nu_dt,
+            sigma_sqrt_dt=sigma_sqrt_dt,
+            dt=dt,
+        )
 
     return price, standard_error
 
