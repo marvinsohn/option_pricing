@@ -121,3 +121,54 @@ def get_multivariate_geometric_brownian_motion(
                 ] * np.exp(nu_dt + sigma_sqrt_dt * e)
 
     return multivariate_gbm_path
+
+
+def get_twodimensional_geometric_brownian_motion(s0, mu, sigma, rho, t, number_steps):
+    """Generate twodimensional path of geometric brownian motion.
+
+    Args:
+        s0 (_type_): _description_
+        mu (_type_): _description_
+        sigma (_type_): _description_
+        rho (_type_): _description_
+        t (_type_): _description_
+        number_steps (_type_): _description_
+
+    Returns:
+        _type_: _description_
+
+    """
+    # compute constants
+    dt = t / number_steps
+    [individual_sigma ^ 2 / 2 for individual_sigma in sigma]
+    nu = [
+        individual_mu - individual_sigma
+        for individual_mu, individual_sigma in zip((mu, sigma), strict=True)
+    ]
+    nu_dt = [individual_nu * dt for individual_nu in nu]
+    sigma_dt = [individual_sigma * dt for individual_sigma in sigma]
+    sqrt_rho = np.sqrt(1 - pow(rho, 2))
+
+    # pre-allocate array
+    # array has number_steps + 1 columns, since first column is filled by s0
+    twodimensional_gbm_path = np.empty((2, number_steps + 1))
+    twodimensional_gbm_path[:, 0] = s0
+
+    for step in range(1, number_steps + 1):
+
+        # first GBM path
+        e_0 = np.random.normal(size=1)
+        twodimensional_gbm_path[0, step] = twodimensional_gbm_path[
+            0,
+            step - 1,
+        ] * np.exp(nu_dt[0] + sigma_dt[0] * e_0)
+
+        # second GBM path
+        # this error term has to be correlated with the error term of the first GBM
+        e_1 = np.random.normal(size=1) * sqrt_rho + rho * e_0
+        twodimensional_gbm_path[1, step] = twodimensional_gbm_path[
+            1,
+            step - 1,
+        ] * np.exp(nu_dt[1] + sigma_dt[1] * e_1)
+
+    return twodimensional_gbm_path
