@@ -9,7 +9,7 @@ from option_pricing.analysis.black_scholes import bs_european_vanilla
 from option_pricing.analysis.monte_carlo import mc_european_vanilla
 
 
-def get_price_european_vanilla(
+def get_european_vanilla(
     s0,
     k,
     t,
@@ -39,13 +39,16 @@ def get_price_european_vanilla(
     """
     if method == "black_scholes":
 
-        return bs_european_vanilla(
-            s0=s0,
-            k=k,
-            t=t,
-            r=r,
-            sigma=sigma,
-            option_type=option_type,
+        return (
+            bs_european_vanilla(
+                s0=s0,
+                k=k,
+                t=t,
+                r=r,
+                sigma=sigma,
+                option_type=option_type,
+            ),
+            0,
         )
 
     if method == "monte_carlo_plain":
@@ -62,7 +65,7 @@ def get_price_european_vanilla(
             option_type=option_type,
         )
 
-        return result[0]
+        return result[0], result[1]
 
     if method == "monte_carlo_vectorized":
 
@@ -78,6 +81,6 @@ def get_price_european_vanilla(
             option_type=option_type,
         )
 
-        return result[0]
+        return result[0], result[1]
 
     return None
