@@ -20,7 +20,7 @@ def test_bs_european_vanilla():
         t=1,
         r=0.05,
         sigma=0.1,
-        call=True,
+        option_type="call",
     )
     computed_put_price = bs_european_vanilla(
         s0=60,
@@ -28,7 +28,7 @@ def test_bs_european_vanilla():
         t=1,
         r=0.05,
         sigma=0.1,
-        call=False,
+        option_type="put",
     )
 
     assert np.absolute([real_call_price - computed_call_price]) < desired_precision

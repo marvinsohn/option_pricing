@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def bs_european_vanilla(s0, k, t, r, sigma, call):
+def bs_european_vanilla(s0, k, t, r, sigma, option_type):
     """Compute the value of an European vanilla option.
 
     Args:
@@ -12,8 +12,8 @@ def bs_european_vanilla(s0, k, t, r, sigma, call):
         t (integer): Time until expiry
         r (float): Risk-free rate
         sigma (float): volatility
-        call (bool, optional): If the option is a call option, select True.
-                                If the option is a put option, select False.
+        option_type (string): If the option is a call option, call.
+                                If the option is a put option, put.
 
     Returns:
         float: Option price
@@ -22,7 +22,7 @@ def bs_european_vanilla(s0, k, t, r, sigma, call):
     d1 = (np.log(s0 / k) + (r + pow(sigma, 2) / 2) * t) / (np.sqrt(t) * sigma)
     d2 = d1 - np.sqrt(t) * sigma
 
-    if call is True:
+    if option_type == "call":
 
         return s0 * norm.cdf(d1) - k * np.exp(-r * t) * norm.cdf(d2)
 
