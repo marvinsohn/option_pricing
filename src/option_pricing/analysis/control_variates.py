@@ -1,6 +1,7 @@
 """Monte carlo option pricing with the help of control variates."""
 
 import numpy as np
+from scipy import stats
 
 from option_pricing.analysis.monte_carlo import mc_european_vanilla
 
@@ -68,6 +69,10 @@ def cv_european_vanilla(
             number_replications=number_replications,
             option_type=option_type,
         )
+
+    elif variate == "delta":
+
+        price, standard_error = cv_european_vanilla_delta()
 
     return price, standard_error
 
@@ -146,3 +151,95 @@ def cv_european_vanilla_antithetic(
     standard_error = sigma_option_price / np.sqrt(number_replications)
 
     return price_at_0, standard_error
+
+
+def cv_european_vanilla_delta(
+    s0,
+    k,
+    r,
+    t,
+    sigma,
+    option_type,
+    number_steps,
+    number_replications,
+    nu_dt,
+    sigma_sqrt_dt,
+    dt,
+):
+    """Price an European vanilla option with delta control variate.
+
+    Args:
+        s0 (float): Start value of underlying
+        k (float): Strike price
+        r (float): Risk-free rate
+        t (float): Time until expiry
+        sigma (float): volatility
+        option_type (string): call, put
+        number_steps (int): Number of steps in each simulation
+        number_replications (int): Number of simulations
+        nu_dt (_type_): _description_
+        sigma_sqrt_dt (_type_): _description_
+        dt (_type_): _description_
+
+    Returns:
+        float: Estimated price of the option
+        float: Standard error of the estimate
+
+    """
+    # Monte carlo simulation
+    error_terms = np.random.normal(size=(number_steps, number_replications))
+    delta_underlying = nu_dt + sigma_sqrt_dt * error_terms
+    st_underlying = s0 * np.cumprod(np.exp(delta_underlying), axis=0)
+    st_underlying = np.concatenate(
+        (np.full(shape=(1, number_replications), fill_value=s0), st_underlying),
+    )
+    delta_underlying = get_delta(
+        r,
+        st_underlying[:-1].T,
+        k,
+        np.linspace(t, dt, number_steps),
+        sigma,
+        option_type,
+    ).T
+    aux = np.cumsum(
+        delta_underlying * (st_underlying[1:] - st_underlying[:-1] * np.exp(r * dt)),
+        axis=0,
+    )
+
+    if option_type == "call":
+        price_at_t = np.maximum(0, st_underlying[-1] - k) - aux[-1]
+    else:
+        price_at_t = np.maximum(0, k - st_underlying[-1]) - aux[-1]
+
+    # Compute option price at time 0 and standard error
+    price_at_0 = np.exp(-r * t) * np.sum(price_at_t) / number_replications
+    sigma_option_price = np.sqrt(
+        np.sum((np.exp(-r * t) * price_at_t - price_at_0) ** 2)
+        / (number_replications - 1),
+    )
+    standard_error = sigma_option_price / np.sqrt(number_replications)
+
+    return price_at_0, standard_error
+
+
+def get_delta(s0, k, r, t, sigma, option_type):
+    """Compute the delta of an option.
+
+    Args:
+        s0 (float): Start value of underlying
+        k (float): Strike price
+        r (float): Risk-free rate
+        t (float): Time until expiry
+        sigma (float): Volatility
+        option_type (string): call, put
+
+    Returns:
+        float: delta of the option
+
+    """
+    d1 = (np.log(s0 / k) + (r + sigma**2 / 2) * t) / (sigma * np.sqrt(t))
+
+    if option_type == "call":
+        return stats.norm.cdf(d1, 0, 1)
+
+    return -stats.norm.cdf(-d1, 0, 1)
