@@ -28,7 +28,7 @@ def get_price_european_vanilla(
         t (float): Time until expiry
         r (float): Risk-free rate
         sigma (float): volatility
-        option_type (string): call, putt
+        option_type (string): call, put
         method (string): black_scholes, monte_carlo_plain, monte_carlo_vectorized
         number_steps (int): Number of steps for monte carlo simulation
         number_replications (int): Number of monte carlo simulations
