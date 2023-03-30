@@ -79,7 +79,7 @@ def get_multivariate_geometric_brownian_motion(
         correlation (array): List of correlation matrices
         t (float): Time horizon
         number_steps (integer): Number of steps of each simulation
-        number_replications (_type_): Number of simulations
+        number_replications (integer): Number of simulations
 
     Returns:
         array: simulated multivariate geometric brownian motions
@@ -100,21 +100,23 @@ def get_multivariate_geometric_brownian_motion(
     sigma_sqrt_dt = [np.sqrt(dt) * individual_sigma for individual_sigma in sigma]
 
     # Create Cholensky factor
-    lower_cholensky_factor = np.transpose(cholesky(correlation, lower=True))
+    lower_cholensky = cholesky(correlation, lower=True)
 
     # 3 Dimensions: Every mu has a number of replications with a number of steps
     # Add +1 to number_steps, since the first steps already exixts with s0
     multivariate_gbm_path = np.empty((number_replications, number_steps + 1, len(mu)))
     # loop over every dimension
     for drift in range(len(mu)):
+        # assign starting value of the paths
         multivariate_gbm_path[:, 0, drift] = s0[drift]
         for replication in range(number_replications):
             for step in range(1, number_steps + 1):
-                # produce correlated standarnd normal error terms
-                e = np.matmul(lower_cholensky_factor, np.random.normal(size=len(mu)))
+                # produce correlated Wiener process error terms
+                e = np.matmul(np.random.normal(0, 1, size=len(mu)), lower_cholensky)
+
                 multivariate_gbm_path[replication, step, :] = multivariate_gbm_path[
                     replication,
-                    step - 1,
+                    (step - 1),
                     :,
                 ] * np.exp(nu_dt + sigma_sqrt_dt * e)
 
