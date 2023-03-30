@@ -1,8 +1,9 @@
 """Generate paths of stochastic processes."""
 import numpy as np
+from scipy.linalg import cholesky
 
 
-def geometric_brownian_motion(
+def get_geometric_brownian_motion(
     s0,
     mu,
     sigma,
@@ -60,14 +61,14 @@ def geometric_brownian_motion(
     return gbm_path
 
 
-def multivariate_geoimetric_brownian_motion(
+def get_multivariate_geometric_brownian_motion(
     s0,
     mu,
     sigma,
     correlation,
     t,
     number_steps,
-    nummber_replications,
+    number_replications,
 ):
     """Generate multivariate paths of geometric brownian motion.
 
@@ -78,7 +79,7 @@ def multivariate_geoimetric_brownian_motion(
         correlation (array): List of correlation matrices
         t (float): Time horizon
         number_steps (integer): Number of steps of each simulation
-        nummber_replications (_type_): Number of simulations
+        number_replications (_type_): Number of simulations
 
     Returns:
         array: simulated multivariate geometric brownian motions
@@ -86,19 +87,28 @@ def multivariate_geoimetric_brownian_motion(
     """
     # precompute constants
     dt = t / number_steps
-    nu_dt = (mu - pow(sigma, 2) / 2) * dt
-    sigma_sqrt_dt = np.sqrt(dt) * sigma
+    sigma_2 = [pow(individual_sigma, 2) for individual_sigma in sigma]
+    divided_sigma = [individual_sigma_2 / 2 for individual_sigma_2 in sigma_2]
+    subtracted = [
+        individual_mu - individual_divided_sigma
+        for (individual_mu, individual_divided_sigma) in zip(
+            (mu, divided_sigma),
+            strict=True,
+        )
+    ]
+    nu_dt = [individual_subtracted * dt for individual_subtracted in subtracted]
+    sigma_sqrt_dt = [np.sqrt(dt) * individual_sigma for individual_sigma in sigma]
 
     # Create Cholensky factor
-    lower_cholensky_factor = np.transpose(np.linalg.cholesky(correlation))
+    lower_cholensky_factor = np.transpose(cholesky(correlation, lower=True))
 
     # 3 Dimensions: Every mu has a number of replications with a number of steps
     # Add +1 to number_steps, since the first steps already exixts with s0
-    multivariate_gbm_path = np.empty((nummber_replications, number_steps + 1, len(mu)))
+    multivariate_gbm_path = np.empty((number_replications, number_steps + 1, len(mu)))
     # loop over every dimension
     for drift in range(len(mu)):
         multivariate_gbm_path[:, 0, drift] = s0[drift]
-        for replication in range(nummber_replications):
+        for replication in range(number_replications):
             for step in range(1, number_steps + 1):
                 # produce correlated standarnd normal error terms
                 e = np.matmul(lower_cholensky_factor, np.random.normal(size=len(mu)))
