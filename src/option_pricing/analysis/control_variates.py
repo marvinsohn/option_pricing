@@ -36,7 +36,7 @@ def cv_european_vanilla(
     """
     # compute constants
     dt = t / number_steps
-    nu_dt = (r - 1 / 2 * pow(sigma, 2)) * dt
+    nu_dt = (r - 0.5 * pow(sigma, 2)) * dt
     sigma_sqrt_dt = sigma * np.sqrt(dt)
     ln_s0 = np.log(s0)
 
@@ -106,13 +106,15 @@ def cv_european_vanilla_antithetic(
 
     # Monte carlo: simulate both assets,
     # the real underlying and the perfect negatively correlated one
-    error_terms = np.random.normal((number_steps, number_replications))
+    error_terms = np.random.normal(size=(number_steps, number_replications))
     delta_underlying = nu_dt + sigma_sqrt_dt * error_terms
     delta_negatively_correlated = nu_dt - sigma_sqrt_dt * error_terms
 
     # Compute the value at time t for both assets
-    st_underlying = np.exp(ln_s0 + np.cumsum(delta_underlying))
-    st_negatively_correlated = np.exp(ln_s0 + np.cumsum(delta_negatively_correlated))
+    st_underlying = np.exp(ln_s0 + np.cumsum(delta_underlying, axis=0))
+    st_negatively_correlated = np.exp(
+        ln_s0 + np.cumsum(delta_negatively_correlated, axis=0),
+    )
 
     # Compute option price at time t
     if option_type == "call":
@@ -138,7 +140,7 @@ def cv_european_vanilla_antithetic(
     # Compute option price at time 0 and standard error
     price_at_0 = np.exp(-r * t) * np.sum(price_at_t) / number_replications
     sigma_option_price = np.sqrt(
-        np.sum(pow(np.exp(-r * t) * price_at_t - price_at_0, 2))
+        np.sum((np.exp(-r * t) * price_at_t - price_at_0) ** 2)
         / (number_replications - 1),
     )
     standard_error = sigma_option_price / np.sqrt(number_replications)
