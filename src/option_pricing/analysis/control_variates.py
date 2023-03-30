@@ -86,6 +86,10 @@ def cv_european_vanilla(
             dt=dt,
         )
 
+    elif variate == "gamma":
+
+        price, standard_error = cv_european_vanilla_gamma()
+
     return price, standard_error
 
 
@@ -213,15 +217,86 @@ def cv_european_vanilla_delta(
         sigma,
         option_type,
     ).T
-    aux = np.cumsum(
+    delta_list = np.cumsum(
         delta_underlying * (st_underlying[1:] - st_underlying[:-1] * np.exp(r * dt)),
         axis=0,
     )
 
     if option_type == "call":
-        price_at_t = np.maximum(0, st_underlying[-1] - k) - aux[-1]
+        price_at_t = np.maximum(0, st_underlying[-1] - k) - delta_list[-1]
     else:
-        price_at_t = np.maximum(0, k - st_underlying[-1]) - aux[-1]
+        price_at_t = np.maximum(0, k - st_underlying[-1]) + delta_list[-1]
+
+    # Compute option price at time 0 and standard error
+    price_at_0 = np.exp(-r * t) * np.sum(price_at_t) / number_replications
+    sigma_option_price = np.sqrt(
+        np.sum((np.exp(-r * t) * price_at_t - price_at_0) ** 2)
+        / (number_replications - 1),
+    )
+    standard_error = sigma_option_price / np.sqrt(number_replications)
+
+    return price_at_0, standard_error
+
+
+def cv_european_vanilla_gamma(
+    s0,
+    k,
+    r,
+    t,
+    sigma,
+    option_type,
+    number_steps,
+    number_replications,
+    nu_dt,
+    sigma_sqrt_dt,
+    dt,
+):
+    """Price an European vanilla option with gamma control variate.
+
+    Args:
+        s0 (float): Start value of underlying
+        k (float): Strike price
+        r (float): Risk-free rate
+        t (float): Time until expiry
+        sigma (float): volatility
+        option_type (string): call, put
+        number_steps (int): Number of steps in each simulation
+        number_replications (int): Number of simulations
+        nu_dt (_type_): _description_
+        sigma_sqrt_dt (_type_): _description_
+        dt (_type_): _description_
+
+    Returns:
+        float: Estimated price of the option
+        float: Standard error of the estimate
+
+    """
+    # Monte carlo simulation
+    error_terms = np.random.normal(size=(number_steps, number_replications))
+    delta_underlying = nu_dt + sigma_sqrt_dt * error_terms
+    st_underlying = s0 * np.cumprod(np.exp(delta_underlying), axis=0)
+    st_underlying = np.concatenate(
+        (np.full(shape=(1, number_replications), fill_value=s0), st_underlying),
+    )
+    gamma = get_gamma(
+        s0=st_underlying[:-1].T,
+        k=k,
+        r=r,
+        t=np.linspace(t, dt, number_steps),
+        sigma=sigma,
+    ).T
+    gamma_list = np.cumsum(
+        gamma
+        * (
+            (st_underlying[1:] - st_underlying[:-1]) ** 2
+            - (np.exp((2 * r + sigma**2) * dt) - 2 * np.exp(r * dt) + 1)
+        ),
+    )
+
+    if option_type == "call":
+        price_at_t = np.maximum(0, st_underlying[-1] - k) - 1 / 2 * gamma_list[-1]
+    else:
+        price_at_t = np.maximum(0, k - st_underlying[-1]) + 1 / 2 * gamma_list[-1]
 
     # Compute option price at time 0 and standard error
     price_at_0 = np.exp(-r * t) * np.sum(price_at_t) / number_replications
@@ -255,3 +330,22 @@ def get_delta(s0, k, r, t, sigma, option_type):
         return stats.norm.cdf(d1, 0, 1)
 
     return -stats.norm.cdf(-d1, 0, 1)
+
+
+def get_gamma(s0, k, r, t, sigma):
+    """Compute the gamma of an option.
+
+    Args:
+        s0 (float): Start value of underlying
+        k (float): Strike price
+        r (float): Risk-free rate
+        t (float): Time until expiry
+        sigma (float): Volatility
+
+    Returns:
+        float: gamma of the option
+
+    """
+    d1 = (np.log(s0 / k) + (r + sigma**2 / 2) * t) / (sigma * np.sqrt(t))
+
+    return stats.norm.pdf(d1, 0, 1) / (s0 * sigma * np.sqrt(t))
