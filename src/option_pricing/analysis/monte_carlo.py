@@ -17,6 +17,7 @@ def mc_european_vanilla(
     number_steps,
     number_replications,
     vectorized,
+    call,
 ):
     """Price European vanilla option via monte carlo simulation.
 
@@ -29,6 +30,7 @@ def mc_european_vanilla(
         number_steps (int): Number of steps in each simulation
         number_replications (inter): Number of different simulations
         vectorized (bool): True for vectorized version. False for loop version
+        call (bool): True for call option. False for put option.
 
     Returns:
         _type_: _description_
@@ -46,7 +48,10 @@ def mc_european_vanilla(
     )
 
     # compute payoffs
-    payoffs_at_t = [np.maximum(path[-1] - k, 0) for path in gbm_paths]
+    if call is True:
+        payoffs_at_t = [np.maximum(path[-1] - k, 0) for path in gbm_paths]
+    else:
+        payoffs_at_t = [np.maximum(k - path[-1], 0) for path in gbm_paths]
     square_payoffs_at_t = [pow(payoff_at_t, 2) for payoff_at_t in payoffs_at_t]
 
     # compute option metrics
