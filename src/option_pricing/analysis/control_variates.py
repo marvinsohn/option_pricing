@@ -102,6 +102,21 @@ def cv_european_vanilla(
             dt=dt,
         )
 
+    elif variate == "all":
+        price, standard_error = cv_european_vanilla_all(
+            s0=s0,
+            k=k,
+            r=r,
+            t=t,
+            sigma=sigma,
+            option_type=option_type,
+            number_steps=number_steps,
+            number_replications=number_replications,
+            nu_dt=nu_dt,
+            sigma_sqrt_dt=sigma_sqrt_dt,
+            dt=dt,
+        )
+
     return price, standard_error
 
 
@@ -307,10 +322,165 @@ def cv_european_vanilla_gamma(
         axis=0,
     )
 
+    # Compute option price at time t
     if option_type == "call":
         price_at_t = np.maximum(0, st_underlying[-1] - k) - 1 / 2 * gamma_list[-1]
     else:
         price_at_t = np.maximum(0, k - st_underlying[-1]) + 1 / 2 * gamma_list[-1]
+
+    # Compute option price at time 0 and standard error
+    price_at_0 = np.exp(-r * t) * np.sum(price_at_t) / number_replications
+    sigma_option_price = np.sqrt(
+        np.sum((np.exp(-r * t) * price_at_t - price_at_0) ** 2)
+        / (number_replications - 1),
+    )
+    standard_error = sigma_option_price / np.sqrt(number_replications)
+
+    return price_at_0, standard_error
+
+
+def cv_european_vanilla_all(
+    s0,
+    k,
+    r,
+    t,
+    sigma,
+    option_type,
+    number_steps,
+    number_replications,
+    nu_dt,
+    sigma_sqrt_dt,
+    dt,
+):
+    """Compute European vanilla option price.
+
+    This function utilizes antithetic, delta
+    and gamma control variates.
+
+    Args:
+        s0 (_type_): _description_
+        k (_type_): _description_
+        r (_type_): _description_
+        t (_type_): _description_
+        sigma (_type_): _description_
+        option_type (_type_): _description_
+        number_steps (_type_): _description_
+        number_replications (_type_): _description_
+        nu_dt (_type_): _description_
+        sigma_sqrt_dt (_type_): _description_
+        dt (_type_): _description_
+
+    Returns:
+        _type_: _description_
+
+    """
+    # First step:
+    # Antithetic variate: simulate an asset, that is perfect negatively correlated
+    # to the underlying of the option contract.
+    error_terms = np.random.normal(size=(number_steps, number_replications))
+    delta_underlying = nu_dt + sigma_sqrt_dt * error_terms
+    delta_negatively_correlated = nu_dt - sigma_sqrt_dt * error_terms
+    st_underlying = s0 * np.cumprod(np.exp(delta_underlying), axis=0)
+    st_negatively_correlated = s0 * np.cumprod(
+        np.exp(delta_negatively_correlated),
+        axis=0,
+    )
+    st_underlying = np.concatenate(
+        (np.full(shape=(1, number_replications), fill_value=s0), st_underlying),
+    )
+    st_negatively_correlated = np.concatenate(
+        (
+            np.full(shape=(1, number_replications), fill_value=s0),
+            st_negatively_correlated,
+        ),
+    )
+
+    # Second step: Delta variate for perfectly negative correlated assets
+    delta_underlying = get_delta(
+        s0=st_underlying[:-1].T,
+        k=k,
+        r=r,
+        t=np.linspace(t, dt, number_steps),
+        sigma=sigma,
+        option_type=option_type,
+    ).T
+    delta_negatively_correlated = get_delta(
+        s0=st_negatively_correlated[:-1].T,
+        k=k,
+        r=r,
+        t=np.linspace(t, dt, number_steps),
+        sigma=sigma,
+        option_type=option_type,
+    ).T
+    delta_underlying_list = np.cumsum(
+        delta_underlying * (st_underlying[1:] - st_underlying[:-1] * np.exp(r * dt)),
+        axis=0,
+    )
+    delta_negatively_correlated_list = np.cumsum(
+        delta_negatively_correlated
+        * (
+            st_negatively_correlated[1:]
+            - st_negatively_correlated[:-1] * np.exp(r * dt)
+        ),
+        axis=0,
+    )
+
+    # Third step: Gamma variate for perfectly negative correlated assets
+    gamma_underlying = get_gamma(
+        s0=st_underlying[1:] - st_underlying[:-1] * np.exp(r * dt),
+        axis=0,
+    )
+    gamma_negatively_correlated = get_gamma(
+        s0=st_negatively_correlated[1:]
+        - st_negatively_correlated[:-1] * np.exp(r * dt),
+        axis=0,
+    )
+    gamma_underlying_list = np.cumsum(
+        gamma_underlying
+        * (
+            (st_underlying[1:] - st_underlying[:-1]) ** 2
+            - (np.exp((2 * r + sigma**2) * dt) - 2 * np.exp(r * dt) + 1)
+            * st_underlying[:-1] ** 2
+        ),
+        axis=0,
+    )
+    gamma_negatively_correlated_list = np.cumsum(
+        gamma_negatively_correlated
+        * (
+            (st_negatively_correlated[1:] - st_negatively_correlated[:-1]) ** 2
+            - (np.exp((2 * r + sigma**2) * dt) - 2 * np.exp(r * dt) + 1)
+            * st_negatively_correlated[:-1] ** 2
+        ),
+        axis=0,
+    )
+
+    # Compute option price at time t
+    if option_type == "call":
+        price_at_t = (
+            1
+            / 2
+            * (
+                np.maximum(0, st_underlying[-1] - k)
+                - delta_underlying_list[-1]
+                - 1 / 2 * gamma_underlying_list[-1]
+                + np.maximum(0, st_negatively_correlated[-1] - k)
+                - delta_negatively_correlated_list[-1]
+                - 1 / 2 * gamma_negatively_correlated_list[-1]
+            )
+        )
+    else:
+        price_at_t = (
+            1
+            / 2
+            * (
+                np.maximum(0, k - st_underlying[-1])
+                + delta_underlying_list[-1]
+                + 1 / 2 * gamma_underlying_list[-1]
+                + np.maximum(0, k - st_negatively_correlated[-1])
+                + delta_negatively_correlated_list[-1]
+                + 1 / 2 * gamma_negatively_correlated_list[-1]
+            )
+        )
 
     # Compute option price at time 0 and standard error
     price_at_0 = np.exp(-r * t) * np.sum(price_at_t) / number_replications
