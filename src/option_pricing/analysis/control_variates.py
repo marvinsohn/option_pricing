@@ -427,20 +427,19 @@ def cv_european_vanilla_all(
 
     # Third step: Gamma variate for perfectly negative correlated assets
     gamma_underlying = get_gamma(
-        s0=st_underlying[1:] - st_underlying[:-1] * np.exp(r * dt),
+        s0=st_underlying[:-1].T,
         k=k,
         r=r,
-        t=t,
+        t=np.linspace(t, dt, number_steps),
         sigma=sigma,
-    )
+    ).T
     gamma_negatively_correlated = get_gamma(
-        s0=st_negatively_correlated[1:]
-        - st_negatively_correlated[:-1] * np.exp(r * dt),
+        s0=st_negatively_correlated[:-1].T,
         k=k,
         r=r,
-        t=t,
+        t=np.linspace(t, dt, number_steps),
         sigma=sigma,
-    )
+    ).T
     gamma_underlying_list = np.cumsum(
         gamma_underlying
         * (
