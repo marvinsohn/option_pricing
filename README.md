@@ -31,7 +31,7 @@ $ conda activate option_pricing
 
 Now everything is set up! To build the project, type
 
-````console
+```console
 $ pytask
 ```
 
@@ -43,13 +43,15 @@ $ pytest
 
 ## Structure
 
-After pytask is executed, the paper can be found under paper/option_pricing.pdf.
-The python scripts relevant for the execution of the project can be found under src/option_pricing/.
-The tests are stored under tests/.
+After pytask is executed, the paper can be found under paper/option_pricing.pdf. The
+python scripts relevant for the execution of the project can be found under
+src/option_pricing/. The tests are stored under tests/.
 
 ## Credits
 
 This project was created with [cookiecutter](https://github.com/audreyr/cookiecutter)
 and the
 [econ-project-templates](https://github.com/OpenSourceEconomics/econ-project-templates).
-````
+
+```
+```
