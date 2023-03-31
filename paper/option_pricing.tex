@@ -86,10 +86,112 @@ Monte Carlo simulation is a widely used technique for the pricing of financial d
 
 To address this challenge, researchers have developed a range of variance reduction techniques that aim to reduce the variance of the simulation output while maintaining its accuracy. These techniques include antithetic variates, delta-control variates, gamma-control variates, and stratified sampling, among others.
 
-\section{Results}\label{sec:results}
+\section{Theory of Variance Reduction Techniques}\label{sec:var_reduc_techniques}
 
+Section \ref{sec:var_reduc_techniques} describes the variance reduction techniques used for this project. The mathematical derivation, notation and computational implementation is taken from \cite{Glassermann:2004}, \cite{Hilpisch:2015}, and \cite{Clewlow:1998}.
+\subsection{Antithetic Variates}
 
-This was created by \cite{Glassermann:2004}, \cite{Hilpisch:2015} and \cite{Clewlow:1998}.
+Antithetic variates is a widely used variance reduction technique in Monte Carlo simulation. The basic idea is to generate pairs of simulations that are negatively correlated, such that the average of the pair is closer to the true value than either simulation alone. This reduces the variance of the simulation output and can improve the accuracy of the estimated option price.
+
+To implement the antithetic variates technique, we generate two sets of random numbers, ${u_1, u_2, ..., u_n}$ and ${v_1, v_2, ..., v_n}$, where $n$ is the number of simulations required. These random numbers are used to simulate the stock price at maturity $T$ under the risk-neutral measure, with the following formula:
+
+\begin{equation}
+S_T = S_0 e^{(r - \frac{1}{2}\sigma^2)T + \sigma\sqrt{T}z}
+\end{equation}
+
+where $S_0$ is the initial stock price, $r$ is the risk-free interest rate, $\sigma$ is the volatility of the stock, and $z$ is a standard normal random variable.
+
+To generate the antithetic variates, we use the following formula to generate the second set of simulations:
+
+\begin{equation}
+S_T^{*} = S_0 e^{(r - \frac{1}{2}\sigma^2)T + \sigma\sqrt{T}(z - \rho \tilde{z})}
+\end{equation}
+
+where $\tilde{z}$ is another standard normal random variable that is negatively correlated with $z$ with correlation coefficient $\rho$. The value of $\rho$ determines the degree of correlation between the two sets of simulations. Ideally, we want $\rho$ to be as close to -1 as possible to maximize the variance reduction.
+
+The option price is then estimated as the average of the two sets of simulations:
+
+\begin{equation}
+C_0 \approx \frac{1}{2n} \sum_{i=1}^{n} (C_i + C_i^*)
+\end{equation}
+
+where $C_i$ and $C_i^*$ are the option prices calculated using the two sets of simulations, and $n$ is the number of simulations.
+
+The antithetic variates technique can be implemented in any Monte Carlo simulation algorithm, such as the Euler discretization or the Milstein discretization. The technique can be particularly effective for European vanilla options with payoff functions that are symmetric around the strike price, as the negative correlation between the two sets of simulations can cancel out some of the random fluctuations in the stock price.
+
+However, the antithetic variates technique may not be effective for all option pricing problems. In some cases, the negative correlation between the two sets of simulations may not be strong enough to provide significant variance reduction. In addition, the technique may not work well for options with complex payoffs or for options with early exercise features.
+
+\subsection{Control Variates}
+
+Control variates aim to reduce the variance of the estimated option price by introducing an auxiliary variable that is highly correlated with the option payoff. The idea is to estimate the option price as the sum of the expected payoff and a correction term that depends on the auxiliary variable. The correction term is chosen such that it has a known value and its addition reduces the variance of the estimated option price.
+
+\subsubsection{Delta-Control Variates}
+
+The delta control variates technique uses the delta of the option as the auxiliary variable. The delta of an option is the rate of change of the option price with respect to the underlying asset price. The delta is an important measure of the sensitivity of the option price to changes in the underlying asset price and is widely used in risk management and hedging.
+
+The delta control variates technique involves simulating two sets of paths: the standard set of paths and the control set of paths. The standard set of paths is used to estimate the option price, while the control set of paths is used to estimate the correction term. The correction term is then added to the estimated option price to obtain the final estimate.
+
+The correction term is given by:
+
+\begin{equation}
+C = \frac{cov(P,C)}{var(C)}(C - \mathbb{E}[C])
+\end{equation}
+
+where $P$ is the option payoff, $C$ is the delta of the option, $cov(P,C)$ is the covariance between the option payoff and the delta, $var(C)$ is the variance of the delta, and $\mathbb{E}[C]$ is the expected value of the delta.
+
+The variance reduction achieved by the delta control variates technique depends on the degree of correlation between the option payoff and the delta. If the correlation is high, the variance reduction can be significant. However, if the correlation is low, the technique may not provide much variance reduction and can even increase the variance of the estimated option price.
+
+\subsubsection{Gamma-Control Variates}
+
+Gamma control variates is a technique that uses the gamma distribution as a control variate for Monte Carlo simulation of European vanilla options. The gamma distribution is a flexible distribution with two parameters, shape parameter $\alpha$ and rate parameter $\beta$. The probability density function of the gamma distribution is given by:
+
+\begin{equation}
+f(x) = \frac{\beta^{\alpha}x^{\alpha - 1}e^{-\beta x}}{\Gamma(\alpha)}
+\end{equation}
+
+where $x \geq 0$ and $\Gamma(\alpha)$ is the gamma function defined by:
+
+\begin{equation}
+\Gamma(\alpha) = \int_{0}^{\infty} t^{\alpha - 1} e^{-t} dt
+\end{equation}
+
+The expected value of the gamma distribution is given by:
+
+\begin{equation}
+E(X) = \frac{\alpha}{\beta}
+\end{equation}
+
+and the variance is given by:
+
+\begin{equation}
+Var(X) = \frac{\alpha}{\beta^2}
+\end{equation}
+
+The gamma distribution has a special property that makes it useful as a control variate for Monte Carlo simulation. If $X$ is a random variable with a gamma distribution with parameters $\alpha$ and $\beta$, then $Y = e^{-rT}X$ has an expected value and variance given by:
+
+\begin{equation}
+E(Y) = e^{-rT}E(X) = e^{-rT}\frac{\alpha}{\beta}
+\end{equation}
+
+\begin{equation}
+Var(Y) = e^{-2rT}Var(X) = e^{-2rT}\frac{\alpha}{\beta^2}
+\end{equation}
+
+where $r$ is the risk-free interest rate and $T$ is the time to maturity of the option. If $Y$ is used as a control variate in Monte Carlo simulation of a European vanilla call option with payoff function $f(S_T) = (S_T - K)^+$, then the simulated option price can be written as:
+
+\begin{equation}
+C = \frac{1}{n} \sum_{i=1}^{n} f(S_T^{(i)}) + \beta(Y - E(Y))
+\end{equation}
+
+where $S_T^{(i)}$ is the simulated stock price at maturity, $\beta$ is the control variate coefficient, and $Y$ is the gamma control variate. The control variate coefficient is chosen to minimize the variance of the simulated option price. It can be shown that the optimal choice of $\beta$ is given by:
+
+\begin{equation}
+\beta^* = -\frac{Cov(f(S_T), Y)}{Var(Y)}
+\end{equation}
+
+where $Cov(f(S_T), Y)$ is the covariance between the option payoff and the gamma control variate.
+\section{Numerical Results}\label{sec:results}
+
 
 \begin{table}[!h]
     \input{../bld/table_results.tex}
