@@ -21,7 +21,7 @@ def task_compute_option_prices(depends_on, produces):
     results_option_pricing = pd.DataFrame(
         columns=[
             "control_variate",
-            "elapsed_time",
+            "absolute_computation_time",
             "average_standard_error",
         ],
     )
@@ -61,7 +61,7 @@ def task_compute_option_prices(depends_on, produces):
         new_results_option_pricing = pd.Series(
             {
                 "control_variate": control_variate,
-                "elapsed_time": elapsed_function_time,
+                "absolute_computation_time": elapsed_function_time,
                 "average_standard_error": np.average(standard_error),
             },
         )
@@ -70,5 +70,15 @@ def task_compute_option_prices(depends_on, produces):
             [results_option_pricing, new_results_option_pricing.to_frame().T],
             ignore_index=True,
         )
+
+    # Compute reduction multiples relative to the pricing model without control variates
+    results_option_pricing["computation_time_reduction_multiple"] = [
+        (results_option_pricing["absolute_computation_time"][0] / computation_time)
+        for computation_time in results_option_pricing["absolute_computation_time"]
+    ]
+    results_option_pricing["standard_error_reduction_multiple"] = [
+        (results_option_pricing["average_standard_error"][0] / standard_error)
+        for standard_error in results_option_pricing["average_standard_error"]
+    ]
 
     results_option_pricing.to_pickle(produces)
