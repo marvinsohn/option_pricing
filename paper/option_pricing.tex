@@ -73,7 +73,7 @@
 
 
 \begin{abstract}
-    This project aims to compare and evaluate various variance reduction techniques used in Monte Carlo simulations for option pricing.
+    This project aims to compare and evaluate various variance reduction techniques used in Monte Carlo simulations for pricing European vanilla options.
 \end{abstract}
 
 \clearpage
@@ -85,6 +85,7 @@
 Monte Carlo simulation is a widely used technique for the pricing of financial derivatives, including European vanilla options. Despite its flexibility and versatility, Monte Carlo simulation can be computationally expensive, requiring a large number of simulations to achieve accurate results. This can be a significant drawback in applications where time and computational resources are limited, such as real-time trading environments.
 
 To address this challenge, researchers have developed a range of variance reduction techniques that aim to reduce the variance of the simulation output while maintaining its accuracy. These techniques include antithetic variates, delta-control variates, gamma-control variates, and stratified sampling, among others.
+
 
 \section{Theory of Variance Reduction Techniques}\label{sec:var_reduc_techniques}
 
@@ -192,20 +193,30 @@ where $S_T^{(i)}$ is the simulated stock price at maturity, $\beta$ is the contr
 where $Cov(f(S_T), Y)$ is the covariance between the option payoff and the gamma control variate.
 \section{Numerical Results}\label{sec:results}
 
-Table \ref{tab:results} presents the numerical results obtained from comparing the different variance reduction techniques of Monte Carlo simulations for pricing European vanilla options. The table reports the control variate technique used, computation time, standard error, computation time multiple, and standard error multiple for each technique.
-
-As expected, using no variance reduction technique (control variate = none) leads to the highest computation time and standard error. Antithetic variates, on the other hand, significantly reduce the computation time to only 0.639936 and provide a similar standard error to the no-technique case. However, the computation time multiple is quite high compared to the no-technique case, with a value of 43.635660. This means that the computational cost of antithetic variates is 43.64 times higher than the no-technique case.
-
-Using delta-control variates and gamma-control variates provides a better balance between computation time and standard error. Delta-control variates have a computation time of 0.985376 and a standard error of 5.743570, resulting in a computation time multiple of 28.338453 and a standard error multiple of 0.974049. Gamma-control variates have a slightly lower computation time of 0.926317 and a standard error of 5.696514, resulting in a computation time multiple of 30.145227 and a standard error multiple of 0.982095. Using both delta and gamma-control variates simultaneously (control variate = all) further improves the accuracy of the simulation, resulting in a standard error of 5.656389, which is similar to the antithetic variates case, but with a much lower computation time multiple of 10.670306.
-
-Overall, these results show that the combination of delta and gamma-control variates can provide an effective variance reduction technique for Monte Carlo simulations of European vanilla options, achieving both high accuracy and relatively low computation time. However, the choice of the most suitable variance reduction technique may depend on the specific requirements of the application, such as the level of accuracy required and the available computational resources.
+Due to the lack of freely available option data sets, we simulate both parameters of the option contract itself and the characteristics of the underlying financial assets. Overall, we simulate 1.000 synthetic European vanilla call options. The underlying asset price ($S_0$), strike price ($K$), and time to maturity ($T$) are generated using a uniform distribution, while the risk-free interest rate ($r$) and volatility of the underlying asset price ($\sigma$) are generated using a normal distribution. The number of steps in the simulation and the number of replications are generated using a discrete uniform distribution.
 
 \begin{center}
-\begin{table}[hbt!]
-    \input{../bld/table_results.tex}
-    \caption{\label{tab:results}\emph{Python:} Results of Monte Carlo Simulations for European Vanilla Option.}
-\end{table}
-\end{center}
+    \begin{table}[hbt!]
+        \input{../bld/table_results.tex}
+        \caption{\label{tab:results}\emph{Python:} Results of Monte Carlo Simulations for European Vanilla Call Option.}
+    \end{table}
+    \end{center}
+
+
+The numerical results of the comparison between the different variance reduction techniques for pricing European vanilla options are presented in Table \ref{tab:results}. The table shows the computation time and standard error for each technique, as well as the computation time and standard error multiple compared to the case with no variate.
+
+As can be seen from the table, the antithetic variate method has the lowest computation time, with a value of 6.04 seconds, which is 43.79 times faster than the case with no variate. However, the standard error of the antithetic variate method is higher than the case with no variate, with a value of 5.30.
+
+The delta-control variate method has a computation time of 9.45 seconds, which is 27.97 times faster than the case with no variate. The standard error of the delta-control variate method is also lower than the case with no variate, with a value of 5.37.
+
+The gamma-control variate method has a computation time of 8.90 seconds, which is 29.70 times faster than the case with no variate. The standard error of the gamma-control variate method is also lower than the case with no variate, with a value of 5.33.
+
+When all three variance reduction techniques are combined, the computation time increases to 24.05 seconds, but the standard error decreases to 5.29. The computation time multiple compared to the case with no variate is 10.99, which is smaller than the multiple for the antithetic variate method, but larger than the multiples for the delta-control and gamma-control variate methods.
+
+\section{Conclusion}\label{sec:conclusion}
+
+Overall, the results suggest that using variance reduction techniques can significantly reduce the computation time for pricing European vanilla options. The antithetic variate method is the fastest, but at the cost of higher standard error. The delta-control and gamma-control variate methods have lower standard error, but slightly longer computation time. Combining all three variance reduction techniques can further reduce the standard error, but at the cost of longer computation time compared to using a single technique.
+
 
 
 % section introduction (end)
