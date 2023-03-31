@@ -42,6 +42,7 @@ def cv_european_vanilla(
     ln_s0 = np.log(s0)
 
     # check for selected variate and return results of the appropriate pricing function
+
     if variate == "none":
 
         price, standard_error = mc_european_vanilla(
@@ -52,7 +53,7 @@ def cv_european_vanilla(
             sigma=sigma,
             number_steps=number_steps,
             number_replications=number_replications,
-            vectorized=True,
+            vectorized=False,
             option_type=option_type,
         )
 
@@ -220,9 +221,9 @@ def cv_european_vanilla_delta(
         option_type (string): call, put
         number_steps (int): Number of steps in each simulation
         number_replications (int): Number of simulations
-        nu_dt (_type_): _description_
-        sigma_sqrt_dt (_type_): _description_
-        dt (_type_): _description_
+        nu_dt (float): Precomputed constant, refer to cv_european_vanilla
+        sigma_sqrt_dt (float): Precomputed constant, refer to cv_european_vanilla
+        dt (float): Precomputed constant, refer to cv_european_vanilla
 
     Returns:
         float: Estimated price of the option
@@ -289,9 +290,9 @@ def cv_european_vanilla_gamma(
         option_type (string): call, put
         number_steps (int): Number of steps in each simulation
         number_replications (int): Number of simulations
-        nu_dt (_type_): _description_
-        sigma_sqrt_dt (_type_): _description_
-        dt (_type_): _description_
+        nu_dt (float): Precomputed constant, refer to cv_european_vanilla
+        sigma_sqrt_dt (float): Precomputed constant, refer to cv_european_vanilla
+        dt (float): Precomputed constant, refer to cv_european_vanilla
 
     Returns:
         float: Estimated price of the option
@@ -358,20 +359,21 @@ def cv_european_vanilla_all(
     and gamma control variates.
 
     Args:
-        s0 (_type_): _description_
-        k (_type_): _description_
-        r (_type_): _description_
-        t (_type_): _description_
-        sigma (_type_): _description_
-        option_type (_type_): _description_
-        number_steps (_type_): _description_
-        number_replications (_type_): _description_
-        nu_dt (_type_): _description_
-        sigma_sqrt_dt (_type_): _description_
-        dt (_type_): _description_
+        s0 (float): Start value of underlying
+        k (float): Strike price
+        r (float): Risk-free rate
+        t (float): Time until expiry
+        sigma (float): Volatility
+        option_type (string): call, put
+        number_steps (int): Number of steps in each simulation
+        number_replications (int): Number of simulations
+        nu_dt (float): Precomputed constant, refer to cv_european_vanilla
+        sigma_sqrt_dt (float): Precomputed constant, refer to cv_european_vanilla
+        dt (float): Precomputed constant, refer to cv_european_vanilla
 
     Returns:
-        _type_: _description_
+        float: Estimated price of the option
+        float: Standard error of the estimate
 
     """
     # First step:

@@ -127,15 +127,15 @@ def get_twodimensional_geometric_brownian_motion(s0, mu, sigma, rho, t, number_s
     """Generate twodimensional path of geometric brownian motion.
 
     Args:
-        s0 (_type_): _description_
-        mu (_type_): _description_
-        sigma (_type_): _description_
-        rho (_type_): _description_
-        t (_type_): _description_
-        number_steps (_type_): _description_
+        s0 (float): Start value of the underlyings
+        mu (float): Drift
+        sigma (float): Volatility
+        rho (float): Correlation
+        t (float): Time until expiry
+        number_steps (integer): Number of steps in each simulation
 
     Returns:
-        _type_: _description_
+        array: twodimensional geometric brownian motion path
 
     """
     # compute constants

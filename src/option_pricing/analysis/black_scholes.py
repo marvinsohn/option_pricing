@@ -43,7 +43,7 @@ def bs_european_exchange(v0, u0, sigma_v, sigma_u, rho, t):
         t (float): Time until expiry
 
     Returns:
-        float: Option prize
+        float: Option price
 
     """
     sigma_v_u = np.sqrt(pow(sigma_u, 2) + pow(sigma_v, 2) - 2 * rho * sigma_u * sigma_v)

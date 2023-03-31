@@ -93,7 +93,8 @@ def mc_european_exchange(
         number_replications (int): Number of different replications
 
     Returns:
-        float: _description_
+        float: Estimated option price
+        float: Confidence interval of the estimated option price
 
     """
     gbm_paths = get_multivariate_geometric_brownian_motion(
