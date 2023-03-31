@@ -128,7 +128,7 @@ Control variates aim to reduce the variance of the estimated option price by int
 
 \subsubsection{Delta-Control Variates}
 
-The delta control variates technique uses the delta of the option as the auxiliary variable. The delta of an option is the rate of change of the option price with respect to the underlying asset price. The delta is an important measure of the sensitivity of the option price to changes in the underlying asset price and is widely used in risk management and hedging.
+The delta control variates technique uses the delta of the option as the auxiliary variable. The delta of an option is the rate of change of the option price with respect to the underlying asset price.
 
 The delta control variates technique involves simulating two sets of paths: the standard set of paths and the control set of paths. The standard set of paths is used to estimate the option price, while the control set of paths is used to estimate the correction term. The correction term is then added to the estimated option price to obtain the final estimate.
 
@@ -193,7 +193,7 @@ where $S_T^{(i)}$ is the simulated stock price at maturity, $\beta$ is the contr
 where $Cov(f(S_T), Y)$ is the covariance between the option payoff and the gamma control variate.
 \section{Numerical Results}\label{sec:results}
 
-Due to the lack of freely available option data sets, we simulate both parameters of the option contract itself and the characteristics of the underlying financial assets. Overall, we simulate 1.000 synthetic European vanilla call options. The underlying asset price ($S_0$), strike price ($K$), and time to maturity ($T$) are generated using a uniform distribution, while the risk-free interest rate ($r$) and volatility of the underlying asset price ($\sigma$) are generated using a normal distribution. The number of steps in the simulation and the number of replications are generated using a discrete uniform distribution.
+Due to the lack of freely available option data sets, we simulate both the parameters of the option contract itself and the characteristics of the underlying financial assets. Overall, we simulate 1.000 synthetic European vanilla call options. The underlying asset price ($S_0$), strike price ($K$), and time to maturity ($T$) are generated using a uniform distribution, while the risk-free interest rate ($r$) and volatility of the underlying asset price ($\sigma$) are generated using a normal distribution. The number of steps in the simulation and the number of replications are generated using a discrete uniform distribution.
 
 \begin{center}
     \begin{table}[hbt!]
