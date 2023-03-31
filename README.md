@@ -33,13 +33,13 @@ Now everything is set up! To build the project, type
 
 ````console
 $ pytask
-´´´
+```
 
 To run the test, type
 
 ```console
 $ pytest
-´´´
+```
 
 ## Structure
 
