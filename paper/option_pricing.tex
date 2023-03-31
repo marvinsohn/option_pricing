@@ -29,12 +29,12 @@
     maxbibnames=10,
     useprefix=false,
     sortcites=true,
-    backend=biber
+    backend=bibtex
 ]{biblatex}
 \AtBeginDocument{\toggletrue{blx@useprefix}}
 \AtBeginBibliography{\togglefalse{blx@useprefix}}
 \setlength{\bibitemsep}{1.5ex}
-\addbibresource{../../paper/refs.bib}
+\addbibresource{refs.bib}
 
 \usepackage[unicode=true]{hyperref}
 \hypersetup{
@@ -73,7 +73,7 @@
 
 
 \begin{abstract}
-    Some abstract here.
+    This project aims to compare and evaluate various variance reduction techniques used in Monte Carlo simulations for option pricing.
 \end{abstract}
 
 \clearpage
@@ -82,23 +82,19 @@
 \section{Introduction} % (fold)
 \label{sec:introduction}
 
-If you are using this template, please cite this item from the references:
-\citet{GaudeckerEconProjectTemplates}.
+Monte Carlo simulation is a widely used technique for the pricing of financial derivatives, including European vanilla options. Despite its flexibility and versatility, Monte Carlo simulation can be computationally expensive, requiring a large number of simulations to achieve accurate results. This can be a significant drawback in applications where time and computational resources are limited, such as real-time trading environments.
 
-The data set for the example project is taken from
-\url{https://www.stem.org.uk/resources/elibrary/resource/28452/large-datasets-stats4schools}.
-It contains data on smoking habits in the UK, with 1691 observations and 12 variables.
-We consider only 4 of the 12 features for the prediction of the variable
-\texttt{smoking}: \texttt{marital\_status}, \texttt{highest\_qualification},
-\texttt{gender} and \texttt{age}. We model the dependence using a Logistic model. All
-numerical features are included linearly, while categorical features are expanded into
-dummy variables. Figures below illustrate the model predictions over the lifetime. You
-will find one figure and one estimation summary table for each installed programming
-language.
+To address this challenge, researchers have developed a range of variance reduction techniques that aim to reduce the variance of the simulation output while maintaining its accuracy. These techniques include antithetic variates, delta-control variates, gamma-control variates, and stratified sampling, among others.
+
+\section{Results}\label{sec:results}
 
 
+This was created by \cite{Glassermann:2004}, \cite{Hilpisch:2015} and \cite{Clewlow:1998}.
 
-
+\begin{table}[!h]
+    \input{../bld/table_results.tex}
+    \caption{\label{tab:results}\emph{Python:} Results of Monte Carlo Simulations for European Vanilla Option.}
+\end{table}
 
 
 % section introduction (end)
