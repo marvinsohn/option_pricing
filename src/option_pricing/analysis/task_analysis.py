@@ -23,7 +23,6 @@ def task_compute_option_prices(depends_on, produces):
             "control_variate",
             "elapsed_time",
             "average_standard_error",
-            "average_price",
         ],
     )
 
@@ -31,7 +30,7 @@ def task_compute_option_prices(depends_on, produces):
 
         start_function_time = time.time()
 
-        price, standard_error = zip(
+        standard_error = zip(
             *[
                 (
                     cv_european_vanilla(
@@ -44,7 +43,7 @@ def task_compute_option_prices(depends_on, produces):
                         number_replications=number_replications,
                         option_type="call",
                         variate=control_variate,
-                    )
+                    )[1]
                 )
                 for (s0, k, sigma, r, t, number_steps, number_replications) in zip(
                     option_parameters["s0"],
@@ -67,7 +66,6 @@ def task_compute_option_prices(depends_on, produces):
                 "control_variate": control_variate,
                 "elapsed_time": elapsed_function_time,
                 "average_standard_error": np.average(standard_error),
-                "average_price": np.average(price),
             },
         )
 
