@@ -30,34 +30,31 @@ def task_compute_option_prices(depends_on, produces):
 
         start_function_time = time.time()
 
-        standard_error = zip(
-            *[
-                (
-                    cv_european_vanilla(
-                        s0=s0,
-                        k=k,
-                        sigma=sigma,
-                        r=r,
-                        t=t,
-                        number_steps=number_steps,
-                        number_replications=number_replications,
-                        option_type="call",
-                        variate=control_variate,
-                    )[1]
+        standard_error = [
+            (
+                cv_european_vanilla(
+                    s0=s0,
+                    k=k,
+                    sigma=sigma,
+                    r=r,
+                    t=t,
+                    number_steps=number_steps,
+                    number_replications=number_replications,
+                    option_type="call",
+                    variate=control_variate,
                 )
-                for (s0, k, sigma, r, t, number_steps, number_replications) in zip(
-                    option_parameters["s0"],
-                    option_parameters["k"],
-                    option_parameters["sigma"],
-                    option_parameters["r"],
-                    option_parameters["t"],
-                    option_parameters["number_steps"],
-                    option_parameters["number_replications"],
-                    strict=True,
-                )
-            ],
-            strict=True,
-        )
+            )
+            for (s0, k, sigma, r, t, number_steps, number_replications) in zip(
+                option_parameters["s0"],
+                option_parameters["k"],
+                option_parameters["sigma"],
+                option_parameters["r"],
+                option_parameters["t"],
+                option_parameters["number_steps"],
+                option_parameters["number_replications"],
+                strict=True,
+            )
+        ]
 
         elapsed_function_time = time.time() - start_function_time
 
