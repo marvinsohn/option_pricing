@@ -16,8 +16,8 @@ def task_compute_option_prices(depends_on, produces):
     results_option_pricing = results_option_pricing.rename(
         columns={
             "control_variate": "Control Variate",
-            "absolute_computation_time": "Absolute Computation Time",
-            "average_standard_error": "Mean Standard Error",
+            "absolute_computation_time": "Computation Time",
+            "average_standard_error": "Standard Error",
             "computation_time_reduction_multiple": "Computation Time Multiple",
             "standard_error_reduction_multiple": "Standard Error Multiple",
         },
